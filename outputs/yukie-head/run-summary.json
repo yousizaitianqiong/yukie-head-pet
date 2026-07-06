@@ -1,0 +1,12 @@
+﻿{
+    "ok":  true,
+    "repair":  "waving ears restored, jumping row enlarged with safe margins, failed-state black tears removed",
+    "repaired_rows":  [
+                          "waving",
+                          "jumping",
+                          "failed"
+                      ],
+    "visual_qa":  "pass",
+    "spritesheet":  "C:\\Users\\Hhhfg\\Documents\\Codex\\2026-07-01\\hatch-pet\\work\\yukie-head\\run\\final\\spritesheet.webp",
+    "package":  "C:\\Users\\Hhhfg\\.codex\\pets\\yukie-head"
+}

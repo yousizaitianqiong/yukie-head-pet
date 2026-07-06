@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>雪绘小脑袋 · 9 状态 Demo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #05070d;
+    }
+
+    #viewport {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    #stage {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      transform-origin: center;
+      background:
+        radial-gradient(circle at 50% 34%, rgba(130, 81, 255, .24), transparent 36%),
+        linear-gradient(145deg, #171525 0%, #090b14 55%, #121827 100%);
+      color: #fff;
+    }
+
+    #stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+    }
+
+    #stage.bg-green { background: #00a86b; }
+    #stage.bg-blue { background: #1769e0; }
+    #stage.bg-white { background: #f4f5f8; color: #10131c; }
+    #stage.bg-black { background: #050505; }
+    #stage.bg-green::before,
+    #stage.bg-blue::before,
+    #stage.bg-white::before,
+    #stage.bg-black::before { display: none; }
+
+    header {
+      position: absolute;
+      z-index: 2;
+      top: 48px;
+      left: 70px;
+      right: 70px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 44px;
+      font-weight: 760;
+      letter-spacing: .03em;
+    }
+
+    .kicker {
+      margin-bottom: 8px;
+      color: #bda9ff;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+    }
+
+    .header-note {
+      color: rgba(255,255,255,.6);
+      font-size: 18px;
+      letter-spacing: .06em;
+    }
+
+    .bg-white .header-note { color: rgba(16,19,28,.62); }
+
+    #overview {
+      position: absolute;
+      inset: 142px 66px 126px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 20px;
+      transition: opacity .28s ease, transform .28s ease;
+    }
+
+    .card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 22px 30px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 26px;
+      background: rgba(255,255,255,.065);
+      box-shadow: inset 0 1px rgba(255,255,255,.07);
+      backdrop-filter: blur(9px);
+    }
+
+    .bg-white .card {
+      border-color: rgba(20,25,40,.12);
+      background: rgba(255,255,255,.62);
+      box-shadow: 0 14px 38px rgba(30,34,50,.08);
+    }
+
+    .sprite-box {
+      flex: 0 0 224px;
+      height: 220px;
+      display: grid;
+      place-items: center;
+    }
+
+    .sprite {
+      flex: none;
+      background-image: url("./yukie-head/spritesheet.webp");
+      background-repeat: no-repeat;
+      image-rendering: auto;
+    }
+
+    .state-copy { min-width: 0; }
+
+    .state-index {
+      color: #a98cff;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: .15em;
+    }
+
+    .state-name {
+      margin: 7px 0 5px;
+      font-size: 30px;
+      font-weight: 760;
+    }
+
+    .state-id {
+      color: rgba(255,255,255,.55);
+      font: 600 16px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .bg-white .state-id { color: rgba(16,19,28,.54); }
+
+    #focus {
+      position: absolute;
+      inset: 130px 70px 120px;
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(18px);
+      transition: opacity .28s ease, transform .28s ease;
+    }
+
+    #focusSpriteBox {
+      height: 720px;
+      display: grid;
+      place-items: center;
+    }
+
+    #focusCopy {
+      padding-right: 80px;
+    }
+
+    #focusNumber {
+      color: #bba6ff;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: .2em;
+    }
+
+    #focusName {
+      margin: 18px 0 8px;
+      font-size: 82px;
+      line-height: 1.05;
+      font-weight: 800;
+    }
+
+    #focusId {
+      color: rgba(255,255,255,.58);
+      font: 650 25px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    #focusDescription {
+      max-width: 520px;
+      margin-top: 30px;
+      color: rgba(255,255,255,.72);
+      font-size: 25px;
+      line-height: 1.65;
+    }
+
+    .bg-white #focusId,
+    .bg-white #focusDescription { color: rgba(16,19,28,.62); }
+
+    #progressTrack {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -42px;
+      height: 5px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+    }
+
+    #progressBar {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #8e6cff, #ff4ba8);
+    }
+
+    body.focus-mode #overview {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-18px);
+    }
+
+    body.focus-mode #focus {
+      opacity: 1;
+      pointer-events: auto;
+      transform: none;
+    }
+
+    #controls {
+      position: absolute;
+      z-index: 5;
+      left: 50%;
+      bottom: 26px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+      background: rgba(8,10,18,.78);
+      box-shadow: 0 14px 45px rgba(0,0,0,.28);
+      transform: translateX(-50%);
+      transition: opacity .2s ease;
+      backdrop-filter: blur(14px);
+    }
+
+    body.hide-controls #controls,
+    body.hide-controls header { opacity: 0; }
+
+    button {
+      height: 42px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 11px;
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      font: 650 15px/1 inherit;
+      cursor: pointer;
+    }
+
+    button:hover { background: rgba(255,255,255,.18); }
+    button.primary { background: #7655ed; }
+    button.active { outline: 2px solid #bcabff; }
+
+    .shortcut {
+      padding: 0 8px;
+      color: rgba(255,255,255,.48);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewport">
+    <main id="stage">
+      <header>
+        <div>
+          <div class="kicker">Codex Animated Pet</div>
+          <h1>雪绘小脑袋 · 九形态展示</h1>
+        </div>
+        <div class="header-note">1536 × 1872 · 192 × 208 / cell</div>
+      </header>
+
+      <section id="overview" aria-label="九形态总览"></section>
+
+      <section id="focus" aria-label="单形态展示">
+        <div id="focusSpriteBox">
+          <div id="focusSprite" class="sprite"></div>
+        </div>
+        <div id="focusCopy">
+          <div id="focusNumber"></div>
+          <div id="focusName"></div>
+          <div id="focusId"></div>
+          <div id="focusDescription"></div>
+          <div id="progressTrack"><div id="progressBar"></div></div>
+        </div>
+      </section>
+
+      <nav id="controls">
+        <button id="overviewBtn" class="active">九宫格 O</button>
+        <button id="focusBtn">单形态 F</button>
+        <button id="prevBtn">←</button>
+        <button id="playBtn" class="primary">自动轮播 A</button>
+        <button id="nextBtn">→</button>
+        <button id="pauseBtn">暂停 Space</button>
+        <button id="bgBtn">背景 B</button>
+        <button id="hideBtn">隐藏控件 H</button>
+        <span class="shortcut">数字 1–9 直达状态</span>
+      </nav>
+    </main>
+  </div>
+
+  <script>
+    const ATLAS = { width: 1536, height: 1872, cellW: 192, cellH: 208 };
+    const states = [
+      { id: "idle",          name: "待机",     frames: 6, row: 0, fps: 4, description: "呼吸、眨眼与轻微耳朵动作。" },
+      { id: "running-right", name: "向右移动", frames: 8, row: 1, fps: 8, description: "朝右移动时的头部倾斜和发丝惯性。" },
+      { id: "running-left",  name: "向左移动", frames: 8, row: 2, fps: 8, description: "保留非对称发饰的独立左向动画。" },
+      { id: "waving",        name: "打招呼",   frames: 4, row: 3, fps: 5, description: "通过耳朵摆动与表情完成问候。" },
+      { id: "jumping",       name: "跳跃",     frames: 5, row: 4, fps: 6, description: "完整头部沿安全的垂直弧线跃起。" },
+      { id: "failed",        name: "失败",     frames: 8, row: 5, fps: 7, description: "从惊讶到沮丧，再恢复状态。" },
+      { id: "waiting",       name: "等待输入", frames: 6, row: 6, fps: 4, description: "期待用户批准、帮助或补充信息。" },
+      { id: "running",       name: "处理中",   frames: 6, row: 7, fps: 7, description: "专注扫描与积极处理任务。" },
+      { id: "review",        name: "检查结果", frames: 6, row: 8, fps: 4, description: "缓慢审视并确认最终输出。" }
+    ];
+
+    const stage = document.querySelector("#stage");
+    const overview = document.querySelector("#overview");
+    const focusSprite = document.querySelector("#focusSprite");
+    const focusNumber = document.querySelector("#focusNumber");
+    const focusName = document.querySelector("#focusName");
+    const focusId = document.querySelector("#focusId");
+    const focusDescription = document.querySelector("#focusDescription");
+    const progressBar = document.querySelector("#progressBar");
+    const playBtn = document.querySelector("#playBtn");
+    const pauseBtn = document.querySelector("#pauseBtn");
+    const overviewBtn = document.querySelector("#overviewBtn");
+    const focusBtn = document.querySelector("#focusBtn");
+
+    const sprites = [];
+    let activeState = 0;
+    let paused = false;
+    let autoSequence = false;
+    let mode = "overview";
+    let stateStartedAt = performance.now();
+    let pausedAt = 0;
+    const stateDuration = 4500;
+    const backgrounds = ["", "bg-black", "bg-green", "bg-blue", "bg-white"];
+    let backgroundIndex = 0;
+
+    function setSprite(sprite, state, frame, scale) {
+      sprite.style.width = `${ATLAS.cellW * scale}px`;
+      sprite.style.height = `${ATLAS.cellH * scale}px`;
+      sprite.style.backgroundSize = `${ATLAS.width * scale}px ${ATLAS.height * scale}px`;
+      sprite.style.backgroundPosition = `${-frame * ATLAS.cellW * scale}px ${-state.row * ATLAS.cellH * scale}px`;
+    }
+
+    states.forEach((state, index) => {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="sprite-box"><div class="sprite"></div></div>
+        <div class="state-copy">
+          <div class="state-index">STATE ${String(index + 1).padStart(2, "0")}</div>
+          <div class="state-name">${state.name}</div>
+          <div class="state-id">${state.id}</div>
+        </div>`;
+      card.addEventListener("click", () => {
+        setMode("focus");
+        selectState(index, true);
+      });
+      overview.appendChild(card);
+      sprites.push({ element: card.querySelector(".sprite"), state, scale: .9 });
+    });
+
+    function fitStage() {
+      const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
+      stage.style.transform = `scale(${scale})`;
+    }
+
+    function setMode(next) {
+      mode = next;
+      document.body.classList.toggle("focus-mode", mode === "focus");
+      overviewBtn.classList.toggle("active", mode === "overview");
+      focusBtn.classList.toggle("active", mode === "focus");
+    }
+
+    function selectState(index, restart = false) {
+      activeState = (index + states.length) % states.length;
+      if (restart) stateStartedAt = performance.now();
+      const state = states[activeState];
+      focusNumber.textContent = `STATE ${String(activeState + 1).padStart(2, "0")} / 09`;
+      focusName.textContent = state.name;
+      focusId.textContent = state.id;
+      focusDescription.textContent = state.description;
+    }
+
+    function toggleAuto() {
+      autoSequence = !autoSequence;
+      playBtn.classList.toggle("active", autoSequence);
+      playBtn.textContent = autoSequence ? "停止轮播 A" : "自动轮播 A";
+      setMode("focus");
+      stateStartedAt = performance.now();
+    }
+
+    function togglePause() {
+      paused = !paused;
+      pauseBtn.classList.toggle("active", paused);
+      pauseBtn.textContent = paused ? "继续 Space" : "暂停 Space";
+      if (paused) pausedAt = performance.now();
+      else stateStartedAt += performance.now() - pausedAt;
+    }
+
+    function cycleBackground() {
+      stage.classList.remove(...backgrounds.filter(Boolean));
+      backgroundIndex = (backgroundIndex + 1) % backgrounds.length;
+      if (backgrounds[backgroundIndex]) stage.classList.add(backgrounds[backgroundIndex]);
+    }
+
+    function animate(now) {
+      const clock = paused ? pausedAt : now;
+      sprites.forEach(({ element, state, scale }) => {
+        const frame = Math.floor(clock / (1000 / state.fps)) % state.frames;
+        setSprite(element, state, frame, scale);
+      });
+
+      const state = states[activeState];
+      const focusFrame = Math.floor(clock / (1000 / state.fps)) % state.frames;
+      setSprite(focusSprite, state, focusFrame, 2.35);
+
+      if (mode === "focus") {
+        const elapsed = Math.max(0, clock - stateStartedAt);
+        progressBar.style.width = `${Math.min(1, elapsed / stateDuration) * 100}%`;
+        if (!paused && autoSequence && elapsed >= stateDuration) {
+          selectState(activeState + 1, true);
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    overviewBtn.addEventListener("click", () => setMode("overview"));
+    focusBtn.addEventListener("click", () => setMode("focus"));
+    document.querySelector("#prevBtn").addEventListener("click", () => { setMode("focus"); selectState(activeState - 1, true); });
+    document.querySelector("#nextBtn").addEventListener("click", () => { setMode("focus"); selectState(activeState + 1, true); });
+    playBtn.addEventListener("click", toggleAuto);
+    pauseBtn.addEventListener("click", togglePause);
+    document.querySelector("#bgBtn").addEventListener("click", cycleBackground);
+    document.querySelector("#hideBtn").addEventListener("click", () => document.body.classList.toggle("hide-controls"));
+
+    addEventListener("keydown", event => {
+      if (event.key >= "1" && event.key <= "9") {
+        setMode("focus");
+        selectState(Number(event.key) - 1, true);
+      } else if (event.key === " " && !event.repeat) {
+        event.preventDefault();
+        togglePause();
+      } else if (event.key.toLowerCase() === "o") {
+        setMode("overview");
+      } else if (event.key.toLowerCase() === "f") {
+        setMode("focus");
+      } else if (event.key.toLowerCase() === "a") {
+        toggleAuto();
+      } else if (event.key.toLowerCase() === "b") {
+        cycleBackground();
+      } else if (event.key.toLowerCase() === "h") {
+        document.body.classList.toggle("hide-controls");
+      } else if (event.key === "ArrowLeft") {
+        setMode("focus");
+        selectState(activeState - 1, true);
+      } else if (event.key === "ArrowRight") {
+        setMode("focus");
+        selectState(activeState + 1, true);
+      }
+    });
+
+    addEventListener("resize", fitStage);
+    fitStage();
+    selectState(0, true);
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
