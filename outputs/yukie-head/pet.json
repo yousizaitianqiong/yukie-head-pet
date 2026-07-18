@@ -1,6 +1,7 @@
 ﻿{
     "id":  "yukie-head",
     "displayName":  "雪绘小脑袋",
-    "description":  "一只以雪绘形象为参考、只呈现漂浮头部的动画宠物。.",
+    "description":  "一只以雪绘形象为参考、只呈现漂浮头部的动画宠物。",
+    "spriteVersionNumber":  2,
     "spritesheetPath":  "spritesheet.webp"
 }
