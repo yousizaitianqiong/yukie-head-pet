@@ -1,48 +1,44 @@
 # Yukie Head Pet
 
-这是一个 Codex 自定义宠物与 QQ 表情包导出项目。
+这是一个以虚拟主播雪绘 Yukie 形象为参考的 Codex 自定义桌宠项目，包含 9 种应用状态动画、互动展示页和 QQ 表情包导出。
 
-## 内容
+## 本次升级
 
-- `outputs/yukie-head/`：Codex 宠物成品
-  - `pet.json`
-  - `spritesheet.webp`
-  - `contact-sheet.png`
-  - `validation.json`
-- `outputs/yukie-head-codex-pet.zip`：可分享的 Codex 宠物包
-- `outputs/yukie-head-demo.html`：9 形态展示页面，适合录制 demo
-- `outputs/yukie-head-stickers/`：从 9 形态动画导出的表情包
-  - `qq-gif/`：推荐导入 QQ 的 240×240 动态 GIF
-  - `qq-png/`：QQ 不接受 GIF 时使用的静态 PNG
-  - `png/`、`gif/`、`webp/`：512×512 高清导出版
-  - `preview-sheet.png`：9 宫格预览图
-- `outputs/yukie-head-stickers.zip`：QQ 表情包打包文件
-- `tools/export_sticker_pack.py`：从 `spritesheet.webp` 重新导出表情包的脚本
+- 修复展示页中文乱码与损坏标签。
+- 新增可拖动、单击问候、双击跳跃和键盘移动。
+- 新增自由巡游、陪伴工作、等待输入、动作选择与场景切换。
+- 新增一键同步脚本，便于通过 Codex 宠物界面的“更新”按钮加载最新版本。
+- 继续复用已通过透明度与图集尺寸校验的 9 状态雪绘动画素材。
 
-## 预览
+## 使用方式
 
-![sticker preview](outputs/yukie-head-stickers/preview-sheet.png)
-
-![pet contact sheet](outputs/yukie-head/contact-sheet.png)
-
-## 重新导出表情包
+更新 Codex 桌宠：
 
 ```powershell
-python tools\export_sticker_pack.py `
-  --spritesheet outputs\yukie-head\spritesheet.webp `
-  --validation outputs\yukie-head\validation.json `
-  --pet-json outputs\yukie-head\pet.json `
-  --output-dir outputs\yukie-head-stickers
+powershell -ExecutionPolicy Bypass -File outputs\update-yukie-head-pet.ps1
 ```
 
-导出结果会生成：
+脚本完成后，回到 Codex 宠物界面点击“更新”。
 
-- `outputs/yukie-head-stickers/qq-gif`
-- `outputs/yukie-head-stickers/qq-png`
-- `outputs/yukie-head-stickers.zip`
+启动互动展示页：
 
-## QQ 导入建议
+```powershell
+powershell -ExecutionPolicy Bypass -File outputs\start-yukie-head-demo.ps1
+```
 
-优先导入 `outputs/yukie-head-stickers/qq-gif` 里的 9 个 GIF 文件。它们已经按中文状态和序号命名，尺寸统一为 240×240。
+## 项目内容
 
-如果当前 QQ 客户端不接受动态 GIF，可以改导入 `qq-png` 目录里的静态 PNG。
+- `outputs/yukie-head/`：Codex v2 宠物包（`pet.json` 与 `spritesheet.webp`）。
+- `outputs/yukie-head-v2-codex-pet.zip`：v2 可分享宠物包。
+- `outputs/yukie-head-demo.html`：互动桌宠展示页。
+- `outputs/yukie-head-codex-pet.zip`：可分享的 Codex 宠物包。
+- `outputs/yukie-head-stickers/`：9 种状态导出的 GIF、PNG 与 WebP 表情。
+- `tools/export_sticker_pack.py`：重新导出表情包的工具。
+
+## 动画状态
+
+待机、向右移动、向左移动、打招呼、跳跃、失败、等待输入、处理中、检查结果。
+
+## 素材与校验
+
+v2 图集为 1536×2288 WebP，每格 192×208，采用 8×11 布局并包含 16 个视线方向，透明背景；修复版 v2 专用校验无错误或警告。
